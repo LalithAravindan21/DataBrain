@@ -1,27 +1,22 @@
 import streamlit as st
-import difflib
+import numpy as np
+from fuzzywuzzy import process
 
-def find_nearest_country(user_input, items):
-    similarities = {country: difflib.SequenceMatcher(None, user_input, country).ratio() for country in items}
-    del similarities[user_input]  # Remove the user's country from the similarities
-    nearest_country = max(similarities, key=similarities.get)
-    return nearest_country, similarities[nearest_country]
+def find_closest_match(target, items):
+    closest_match, _ = process.extractOne(target, items)
+    return closest_match
 
 def main():
-    st.title("Nearest Country Finder")
+    st.title("Closest Match Finder")
+    st.write("Enter a target value and an array of items, and I'll find the closest match in the array.")
 
-    # Define your array of items (countries)
-    countries = ["US", "UK", "Canada", "Australia", "France", "Germany", "Japan", "China", "India", "Brazil"]
+    target = st.text_input("Enter the target value:")
+    items_str = st.text_input("Enter the array of items separated by commas:")
+    items = [x.strip() for x in items_str.split(',') if x]
 
-    # Get user input: Select their country
-    user_country = st.selectbox("Select your country:", countries)
-
-    if user_country:
-        # Find nearest country
-        nearest, similarity = find_nearest_country(user_country, countries)
-
-        # Display result
-        st.write(f"The nearest country to {user_country} is {nearest} (Similarity: {similarity:.2f})")
+    if items:
+        closest_match = find_closest_match(target, items)
+        st.write(f"The closest match to '{target}' in the array is: '{closest_match}'")
 
 if __name__ == "__main__":
     main()
