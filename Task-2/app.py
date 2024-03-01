@@ -1,12 +1,10 @@
 import streamlit as st
 import difflib
 
-def find_closest_match(user_input, items):
-    closest_match = difflib.get_close_matches(user_input, items)
-    if closest_match:
-        return closest_match[0]
-    else:
-        return None
+def find_nearest_country(user_input, items):
+    similarity_scores = {country: difflib.SequenceMatcher(None, user_input, country).ratio() for country in items}
+    nearest_country = max(similarity_scores, key=similarity_scores.get)
+    return nearest_country
 
 def main():
     st.title("Array Display App")
@@ -17,14 +15,11 @@ def main():
     # Get user input
     user_input = st.text_input("Type a country:")
 
-    # Find closest match
-    closest = find_closest_match(user_input, items)
+    # Find nearest country
+    nearest = find_nearest_country(user_input, items)
 
     # Display result
-    if closest:
-        st.write(f"Closest match: {closest}")
-    else:
-        st.write("No match found.")
+    st.write(f"Nearest country to '{user_input}': {nearest}")
 
 if __name__ == "__main__":
     main()
