@@ -1,20 +1,5 @@
 import streamlit as st
 import PyPDF2
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-
-nltk.download('punkt')
-nltk.download('stopwords')
-
-# Function to preprocess text
-def preprocess_text(text):
-    stop_words = set(stopwords.words("english"))
-    word_tokens = word_tokenize(text.lower())
-    filtered_text = [word for word in word_tokens if word.isalnum() and word not in stop_words]
-    return " ".join(filtered_text)
 
 # Function to read PDF file
 def read_pdf(file):
@@ -28,22 +13,17 @@ def read_pdf(file):
 
 # Function to search for answers in PDF text based on user question
 def search_question(text, question):
-    # Preprocess text and question
-    preprocessed_text = preprocess_text(text)
-    preprocessed_question = preprocess_text(question)
+    # Convert question and text to lowercase for case-insensitive matching
+    question = question.lower()
+    text = text.lower()
 
-    # Vectorize text and question
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform([preprocessed_text, preprocessed_question])
+    # Search for question keywords in the text
+    if question in text:
+        # If question keywords found, return the relevant part of the text
+        return text[text.find(question):]
 
-    # Calculate cosine similarity between text and question
-    similarity = cosine_similarity(tfidf_matrix)[0, 1]
-
-    # If similarity is above a threshold, return the relevant part of the text
-    if similarity > 0.2:
-        return text
-    else:
-        return None
+    # If question keywords not found, return None
+    return None
 
 # Main function
 def main():
