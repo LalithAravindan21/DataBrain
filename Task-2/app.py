@@ -2,9 +2,9 @@ import streamlit as st
 import difflib
 
 def find_nearest_country(user_input, items):
-    similarity_scores = {country: difflib.SequenceMatcher(None, user_input, country).ratio() for country in items}
-    nearest_country = max(similarity_scores, key=similarity_scores.get)
-    return nearest_country
+    similarities = [(country, difflib.SequenceMatcher(None, user_input, country).ratio()) for country in items]
+    similarities.sort(key=lambda x: x[1], reverse=True)
+    return similarities[0][0]
 
 def main():
     st.title("Array Display App")
