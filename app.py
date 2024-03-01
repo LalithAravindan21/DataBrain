@@ -1,5 +1,9 @@
 import streamlit as st
 import PyPDF2
+import nltk
+from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.tag import pos_tag
+import os
 
 # Function to read PDF file
 def read_pdf(file):
@@ -11,25 +15,18 @@ def read_pdf(file):
         text += page.extractText()
     return text
 
-# Function to search for answers in PDF text based on user question
-def search_question(text, question):
-    # Convert question and text to lowercase for case-insensitive matching
-    question = question.lower()
-    text = text.lower()
-
-    # Search for question keywords in the text
-    if question in text:
-        # If question keywords found, return the relevant part of the text
-        return text[text.find(question):]
-
-    # If question keywords not found, return None
-    return None
+# Function to extract keywords using NLTK
+def extract_keywords(text):
+    tokens = word_tokenize(text)
+    tagged = pos_tag(tokens)
+    keywords = [word for word, pos in tagged if pos.startswith("NN") or pos.startswith("VB")]
+    return keywords
 
 # Main function
 def main():
     st.title("PDF Question Answering")
 
-    uploaded_file = st.file_uploader("Upload a PDF file", type="pdf")
+    uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
     if uploaded_file is not None:
         st.write("File uploaded successfully!")
@@ -40,12 +37,24 @@ def main():
         question = st.text_input("Ask a question about the PDF:")
         if question:
             st.write("### Question:", question)
-            answer = search_question(text, question)
-            if answer:
+            keywords = extract_keywords(question)
+            matching_sentences = []
+            for sentence in sent_tokenize(text):
+                if all(keyword.lower() in sentence.lower() for keyword in keywords):
+                    matching_sentences.append(sentence.strip())
+            if matching_sentences:
                 st.write("### Answer:")
-                st.write(answer)
+                for matching_sentence in matching_sentences:
+                    st.write(matching_sentence)
             else:
                 st.write("Sorry, I couldn't find an answer to that question.")
+
+# Download NLTK data files and set NLTK data path
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
+nltk.data.path.append(nltk_data_path)
+os.environ["NLTK_DATA"] = nltk_data_path
 
 # Run the main function
 if __name__ == "__main__":
