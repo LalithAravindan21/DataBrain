@@ -1,6 +1,5 @@
 import streamlit as st
-import numpy as np
-from fuzzywuzzy import process
+from rapidfuzz import process
 
 def find_closest_match(target, items):
     closest_match, _ = process.extractOne(target, items)
